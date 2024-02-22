@@ -1,0 +1,59 @@
+# Code formatting
+black
+
+# Utilities
+pydantic
+typer[all]
+python-dotenv
+#orjson
+#backoff
+#rich  # terminal coloring
+humanize  # readable numbers/times
+#pydash
+#pygit2
+#jinja2
+
+# Machine learning
+pandas
+scikit-learn
+matplotlib
+torch
+torchvision
+torchaudio
+transformers # huggingface
+#faiss-cpu
+#langchain
+wandb
+tiktoken
+
+# Jupyter lab
+jupyterlab
+jupyter_contrib_nbextensions
+ipywidgets
+
+# Tests
+pytest
+pytest-asyncio
+
+# Web
+#requests
+#grequests
+#fastapi[all]
+#uvicorn  # for fastapi dev server
+#httpx
+#beautifulsoup4
+#playwright
+#pypdf
+#pdfminer.six
+
+# Services
+#modal
+#openai
+#gspread
+#gspread-formatting
+
+
+
+
+
+
