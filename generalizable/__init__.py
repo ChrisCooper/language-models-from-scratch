@@ -3,6 +3,8 @@ import torch
 from pydantic import BaseModel
 from typing import Callable
 import tiktoken
+from custom_tokenizer import FrequencyGreedyTokenizer
+
 
 def get_best_torch_device():
     if torch.cuda.is_available():
@@ -36,6 +38,7 @@ def load_text_directory(directory_path: str):
     files_loaded = 0
     for file in os.listdir(real_path):
         if file.endswith(".txt"):
+            # print(f'Loading: {file}')
             stripped_text = load_text_file(os.path.join(real_path, file))
 
             if "*** START OF THE PROJECT GUTENBERG EBOOK" in stripped_text:
@@ -59,39 +62,52 @@ def load_text_file(file_path):
         return file.read()
 
 
-def encode_text(text, tokenization='char'):
+def encode_text(text, tokenizer):
     unique_tokens = []
     all_tokens = []
     int_to_str = {}
-    if tokenization == 'char':
-        unique_tokens = sorted(list(set(text)))
-        tok_to_int = {tok: i for i, tok in enumerate(unique_tokens)}
-        int_to_str = {i: tok for i, tok in enumerate(unique_tokens)}
-        all_tokens = [tok_to_int[tok] for tok in text]
-    elif tokenization == 'tiktoken':
-        enc = tiktoken.get_encoding("cl100k_base")
-        all_raw_tokens = enc.encode(text)
-        unique_tokens = sorted(list(set(all_raw_tokens)))
 
-        tok_to_int = {tok: i for i, tok in enumerate(unique_tokens)}
-        int_to_str = {i: enc.decode([tok]) for i, tok in enumerate(unique_tokens)}
-        all_tokens = [tok_to_int[tok] for tok in all_raw_tokens]
-    elif tokenization == 'bigram':
-        if len(text) % 2 != 0:
-            text = text + '\n'
-        tokens = [text[i:i + 2] for i in range(0, len(text), 2)]
-        unique_tokens = sorted(list(set(tokens)))
-        tok_to_int = {tok: i for i, tok in enumerate(unique_tokens)}
-        int_to_str = {i: tok for i, tok in enumerate(unique_tokens)}
-        all_tokens = [tok_to_int[tok] for tok in tokens]
-    elif tokenization == 'trigram':
-        while len(text) % 3 != 0:
-            text = text + '\n'
-        tokens = [text[i:i + 3] for i in range(0, len(text), 3)]
-        unique_tokens = sorted(list(set(tokens)))
-        tok_to_int = {tok: i for i, tok in enumerate(unique_tokens)}
-        int_to_str = {i: tok for i, tok in enumerate(unique_tokens)}
-        all_tokens = [tok_to_int[tok] for tok in tokens]
+    if not isinstance(tokenizer, FrequencyGreedyTokenizer):
+        raise ValueError(f'Unsupported tokenizer: {tokenizer}')
+
+    all_raw_tokens = tokenizer.encode(text)
+    unique_tokens = sorted(list(set(all_raw_tokens)))
+
+    tok_to_int = {tok: i for i, tok in enumerate(unique_tokens)}
+    int_to_str = {i: tokenizer.decode([tok]) for i, tok in enumerate(unique_tokens)}
+    all_tokens = [tok_to_int[tok] for tok in all_raw_tokens]
+
+    # if tokenization == 'char':
+    #     unique_tokens = sorted(list(set(text)))
+    #     tok_to_int = {tok: i for i, tok in enumerate(unique_tokens)}
+    #     int_to_str = {i: tok for i, tok in enumerate(unique_tokens)}
+    #     all_tokens = [tok_to_int[tok] for tok in text]
+    # elif tokenization == 'tiktoken':
+    #     enc = tiktoken.get_encoding("cl100k_base")
+    #     all_raw_tokens = enc.encode(text)
+    #     unique_tokens = sorted(list(set(all_raw_tokens)))
+    #
+    #     tok_to_int = {tok: i for i, tok in enumerate(unique_tokens)}
+    #     int_to_str = {i: enc.decode([tok]) for i, tok in enumerate(unique_tokens)}
+    #     all_tokens = [tok_to_int[tok] for tok in all_raw_tokens]
+    # elif tokenization == 'bigram':
+    #     if len(text) % 2 != 0:
+    #         text = text + '\n'
+    #     tokens = [text[i:i + 2] for i in range(0, len(text), 2)]
+    #     unique_tokens = sorted(list(set(tokens)))
+    #     tok_to_int = {tok: i for i, tok in enumerate(unique_tokens)}
+    #     int_to_str = {i: tok for i, tok in enumerate(unique_tokens)}
+    #     all_tokens = [tok_to_int[tok] for tok in tokens]
+    # elif tokenization == 'trigram':
+    #     while len(text) % 3 != 0:
+    #         text = text + '\n'
+    #     tokens = [text[i:i + 3] for i in range(0, len(text), 3)]
+    #     unique_tokens = sorted(list(set(tokens)))
+    #     tok_to_int = {tok: i for i, tok in enumerate(unique_tokens)}
+    #     int_to_str = {i: tok for i, tok in enumerate(unique_tokens)}
+    #     all_tokens = [tok_to_int[tok] for tok in tokens]
+    # elif tokenization == 'trigram':
+    #     pass
 
     vocab_size = len(unique_tokens)
     print(f'Text length: {len(text)}, total tokens: {len(all_tokens)}, vocab size: {vocab_size}')
