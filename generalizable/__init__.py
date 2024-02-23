@@ -58,7 +58,8 @@ def load_text_directory(directory_path: str):
 
 
 def load_text_file(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
+    real_path = os.path.expanduser(file_path)
+    with open(real_path, 'r', encoding='utf-8') as file:
         return file.read()
 
 
