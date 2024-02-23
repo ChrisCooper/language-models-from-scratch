@@ -226,7 +226,7 @@ class BytePairEncodingTokenizer:
             # print(f"Expanding {sub_value} -> {pair_to_sub} ({self.str_repr(pair_to_sub)})")
             sequence = self.expand_token(sequence, sub_value, pair_to_sub)
 
-        return bytes(sequence).decode('utf-8')
+        return bytes(sequence).decode('utf-8', errors='replace')
 
 
 
